@@ -1,4 +1,5 @@
 import requests
+import newsapi
 
 STOCK_NAME = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -16,22 +17,49 @@ parameters = {
 response = requests.get("https://www.alphavantage.co/query", params=parameters)
 response.raise_for_status()
 
-data = response.json()
-print(data["Time Series (Daily)"])
+data = response.json()["Time Series (Daily)"]
+
 
 
     ## STEP 1: Use https://www.alphavantage.co/documentation/#daily
 # When stock price increase/decreases by 5% between yesterday and the day before yesterday then print("Get News").
 
-#TODO 1. - Get yesterday's closing stock price. Hint: You can perform list comprehensions on Python dictionaries. e.g. [new_value for (key, value) in dictionary.items()]
+#TODO 1. - Get yesterday's closing stock price. Hint: You can perform list comprehensions on Python dictionaries.
+# e.g. [new_value for (key, value) in dictionary.items()]
+
+price_list = [value for (key, value) in data.items()]
+yesterdays_close_price = float(price_list[0]["4. close"])
+print(yesterdays_close_price)
+
 
 #TODO 2. - Get the day before yesterday's closing stock price
 
+day_before_yesterday_close = float(price_list[1]["4. close"])
+print(day_before_yesterday_close)
+
 #TODO 3. - Find the positive difference between 1 and 2. e.g. 40 - 20 = -20, but the positive difference is 20. Hint: https://www.w3schools.com/python/ref_func_abs.asp
+
+raw_difference = abs(yesterdays_close_price - day_before_yesterday_close)
+
+print(raw_difference)
 
 #TODO 4. - Work out the percentage difference in price between closing price yesterday and closing price the day before yesterday.
 
+perctange_difference = (raw_difference / yesterdays_close_price)  * 100
+
+print(perctange_difference)
+
 #TODO 5. - If TODO4 percentage is greater than 5 then print("Get News").
+
+if perctange_difference > 1:
+    api = newsapi.NewsApiClient(api_key="b0228b5ce50e4adca6509a06cd549232")
+    news_api_articles = api.get_everything(q=COMPANY_NAME)
+    top_three_articles = news_api_articles["articles"][:3]
+
+
+    list_articles = [article["title"] for article in top_three_articles]
+    for article in list_articles:
+        print(article)
 
     ## STEP 2: https://newsapi.org/ 
     # Instead of printing ("Get News"), actually get the first 3 news pieces for the COMPANY_NAME. 
